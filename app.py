@@ -28,13 +28,16 @@ mail = Mail(app)
 # Database configuration
 # Database connection function
 def get_db_connection():
+    print("DB_HOST:", os.getenv("DB_HOST"))
+    print("DB_NAME:", os.getenv("DB_NAME"))
     return psycopg2.connect(
         host=os.getenv("DB_HOST"),
         dbname=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        port=os.getenv("DB_PORT", 5432)  # по умолчанию 5432
+        port=os.getenv("DB_PORT", 5432)
     )
+
 
 # Function to send Email
 def send_verification_email(email, verification_code):
