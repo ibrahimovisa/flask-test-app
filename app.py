@@ -78,30 +78,51 @@ def signup():
 @app.route("/verify_email", methods=["GET", "POST"])
 def verify_email():
     if request.method == "POST":
-        user_code = request.form["verification_code"]
-        if "verification_code" in session and str(user_code) == str(session["verification_code"]):
-            # Save user to the database
-            conn = get_db_connection()
-            cur = conn.cursor()
-            
-            # Reset the sequence to the next available ID
-            cur.execute("SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE((SELECT MAX(id) FROM users), 0) + 1, false)")
-            
-            # Then insert the new user
-            cur.execute(
-                "INSERT INTO users (name, email, password, phone_number, birthday, role) "
-                "VALUES (%s, %s, %s, %s, %s, 'student')",
-                (session["name"], session["email"], session["password"], 
-                 session["phone_number"], session["birthday"])
-            )
-            conn.commit()
-            cur.close()
-            conn.close()
+        user_code = request.form.get("verification_code")
+        session_code = session.get("verification_code")
 
-            flash("Account created successfully!")
-            return redirect(url_for("login"))
+        if session_code and str(user_code) == str(session_code):
+            try:
+                conn = get_db_connection()
+                cur = conn.cursor()
+
+                # Обновить последовательность ID
+                cur.execute("""
+                    SELECT setval(
+                        pg_get_serial_sequence('users', 'id'),
+                        COALESCE((SELECT MAX(id) FROM users), 0) + 1,
+                        false
+                    )
+                """)
+
+                # Добавить пользователя
+                cur.execute("""
+                    INSERT INTO users (name, email, password, phone_number, birthday, role)
+                    VALUES (%s, %s, %s, %s, %s, 'student')
+                """, (
+                    session.get("name"),
+                    session.get("email"),
+                    session.get("password"),
+                    session.get("phone_number"),
+                    session.get("birthday")
+                ))
+
+                conn.commit()
+                flash("Account created successfully!")
+                return redirect(url_for("login"))
+
+            except Exception as e:
+                print("Database error:", e)
+                flash("Server error. Please try again.")
+                return render_template("verify_email.html")
+
+            finally:
+                cur.close()
+                conn.close()
+
         else:
             flash("Incorrect verification code. Try again.")
+
     return render_template("verify_email.html")
 
 @app.route("/login", methods=["GET", "POST"])
