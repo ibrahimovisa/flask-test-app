@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <div class="logo"><a href="{{ url_for('index') }}">SkillCraft</a></div>
+        <div class="header-right">
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('signup') }}">Sign Up</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section id="signup-form">
+        <h2>Create an Account</h2>
+        <form id="registerForm" method="POST">
+          <div class="form-group">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" required />
+            <span id="nameError" class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+            <span id="emailError" class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required />
+            <span id="passwordError" class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password:</label>
+            <input
+              type="password"
+              id="confirm-password"
+              name="confirm-password"
+              required
+            />
+            <span id="confirmPasswordError" class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="phone_number">Phone Number:</label>
+            <input
+              type="phone"
+              id="phone_number"
+              name="phone_number"
+              pattern="\+994[0-9]{9}"
+              title="e.g. +994123456789"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="birthday">Birthday:</label>
+            <input
+              type="date"
+              id="birthday"
+              name="birthday"
+              class="birthday"
+              required
+            />
+          </div>
+          <!-- SMS Code Input Section -->
+          <div class="form-group" id="smsCodeSection" style="display: none">
+            <label for="sms_code">Enter SMS Code:</label>
+            <input type="text" id="sms_code" name="sms_code" />
+            <span id="smsCodeError" class="error-message"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="terms">
+              <input type="checkbox" id="terms" name="terms" required /> I agree
+              to the <a href="#">Terms and Conditions</a>
+            </label>
+            <span id="termsError" class="error-message"></span>
+          </div>
+          <button type="submit" class="submit-button">Register</button>
+        </form>
+        {% if message %}
+        <p class="error-message">{{ message }}</p>
+        {% endif %}
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 SkillCraft</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>

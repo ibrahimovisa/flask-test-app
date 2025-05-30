@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Email Code</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <div class="logo"><a href="{{ url_for('index') }}">SkillCraft</a></div>
+        <div class="header-right">
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('signup') }}">Sign Up</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section id="verify-email-form">
+        <h2>Enter Verification Code</h2>
+        {% if message %}
+        <p class="error-message">{{ message }}</p>
+        {% endif %}
+        <form method="POST">
+          <!-- Corrected the for attribute to match the id of the input -->
+          <label for="verification_code"
+            >Enter the verification code sent to your email:</label
+          >
+          <input
+            type="text"
+            id="verification_code"
+            name="verification_code"
+            required
+          />
+          <button type="submit">Verify</button>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 SkillCraft</p>
+    </footer>
+  </body>
+</html>

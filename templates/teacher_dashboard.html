@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <div class="logo"><a href="#">SkillCraft</a></div>
+        <div class="header-right">
+          <a id="logoutLink" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </nav>
+    </header>
+
+    <main style="flex-direction: column">
+      <section class="journal-attendance-section">
+        <h2>Journal</h2>
+        <!-- Attendance Form -->
+        <div class="attendance-form">
+          <form id="attendanceForm">
+            <div class="form-group">
+              <label for="courseSelect">Course:</label>
+              <select id="courseSelect">
+                <option value="" selected>Select</option>
+                {% for course in courses %}
+                <option value="{{ course[0] }}">{{ course[1] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div
+              id="teacherData"
+              data-teacher-id="{{ session['user_id'] }}"
+              style="display: none"
+            ></div>
+            <div class="form-group">
+              <label for="groupSelect">Group:</label>
+              <select id="groupSelect" disabled>
+                <option value="">Select Group</option>
+              </select>
+            </div>
+          </form>
+          <div class="button-group">
+            <button id="addDayButton">Activate</button>
+            <button id="submitAttendanceButton" style="display: none">
+              Submit
+            </button>
+          </div>
+          <!-- Add this modal section before the closing body tag -->
+          <div id="addDayModal" class="modal" style="display: none">
+            <div class="modal-content">
+              <span class="close">&times;</span>
+              <h2>Activate New Day</h2>
+              <div class="form-group">
+                <label for="newDayInput">Day Number:</label>
+                <input type="number" id="newDayInput" required />
+              </div>
+              <div class="form-group">
+                <label for="newDayDateInput">Date:</label>
+                <input type="date" id="newDayDateInput" required />
+              </div>
+              <button id="confirmAddDayButton" onclick="confirmAddDay()">
+                Activate
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Journal Table -->
+        <div class="journal-table">
+          <div id="journalTableContainer">
+            <div class="table-scroll-wrapper">
+              <table id="journalTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <!-- Days will be populated dynamically -->
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Rows will be populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Teacher File Management -->
+      <section class="teacher-files-section">
+        <h2>Course Files Management</h2>
+
+        <!-- Upload Section -->
+        <div class="file-upload-section">
+          <form id="teacherUploadForm">
+            <div class="file-filters">
+              <div class="form-group">
+                <label>Course:</label>
+                <select id="teacherCourseSelect" required>
+                  <option value="">Select Course</option>
+                  {% for course in courses %}
+                  <option value="{{ course[0] }}">{{ course[1] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Group:</label>
+                <select id="teacherGroupSelect" disabled required>
+                  <option value="">Select Group</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Day:</label>
+                <select id="teacherDaySelect" disabled required>
+                  <option value="">Select Day</option>
+                </select>
+              </div>
+            </div>
+
+            <input
+              type="file"
+              id="teacherFileInput"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.zip,.py,.java,.txt,.js,.html,.css"
+              required
+            />
+            <button type="submit">Upload File</button>
+            <div class="file-info">
+              Max 10MB (Documents, Code files, Archives)
+            </div>
+          </form>
+        </div>
+
+        <!-- Files Display -->
+        <div id="teacherFilesContainer" class="uploaded-files">
+          <!-- Files will be loaded here -->
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 SkillCraft</p>
+    </footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>

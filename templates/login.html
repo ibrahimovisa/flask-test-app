@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <div class="logo"><a href="{{ url_for('index') }}">SkillCraft</a></div>
+        <div class="header-right">
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('signup') }}">Sign Up</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section id="login-form">
+        <h2>Login</h2>
+        <form id="loginForm" action="{{ url_for('login') }}" method="POST">
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required />
+            <span id="emailLoginError" class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required />
+            <span id="passwordLoginError" class="error-message"></span>
+          </div>
+          <button type="submit" class="submit-button">Login</button>
+        </form>
+        {% if message %}
+        <p style="color: red">{{ message }}</p>
+        {% endif %}
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 SkillCraft</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>

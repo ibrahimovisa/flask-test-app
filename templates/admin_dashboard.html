@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <!-- <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    /> -->
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <div class="logo"><a href="#">SkillCraft</a></div>
+        <div class="header-right">
+          <a id="logoutLink" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </nav>
+    </header>
+
+    <main style="flex-direction: column">
+      <section class="journal-attendance-section">
+        <h2>Journal</h2>
+
+        <!-- Attendance Form -->
+        <div class="attendance-form">
+          <form id="attendanceForm">
+            <div class="form-group">
+              <label for="courseSelect">Course:</label>
+              <select id="courseSelect">
+                <option value="" selected>Select</option>
+                {% for course in courses %}
+                <option value="{{ course[0] }}">{{ course[1] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="teacherSelect">Teacher:</label>
+              <select id="teacherSelect" disabled>
+                <option value="">Select Teacher</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="groupSelect">Group:</label>
+              <select id="groupSelect" disabled>
+                <option value="">Select Group</option>
+              </select>
+            </div>
+          </form>
+          <div>
+            <!-- Create Group Button -->
+            <button id="createGroupButton">Create Group</button>
+
+            <!-- Create Group Modal -->
+            <div id="createGroupModal" class="modal">
+              <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Create New Group</h2>
+
+                <label for="courseSelectForGroup">Course:</label>
+                <select id="courseSelectForGroup" required>
+                  <option value="" selected>Select</option>
+                  {% for course in courses %}
+                  <option value="{{ course[0] }}">{{ course[1] }}</option>
+                  {% endfor %}
+                </select>
+
+                <label for="teacherSelectForGroup">Teacher:</label>
+                <select id="teacherSelectForGroup" required>
+                  <option value="">Select Teacher</option>
+                </select>
+
+                <label for="groupNameInput">Group Name:</label>
+                <input type="text" id="groupNameInput" value="Group" required />
+
+                <label for="userIdsInput">User IDs (comma-separated):</label>
+                <input
+                  type="text"
+                  id="userIdsInput"
+                  placeholder="e.g., 1, 2, 3"
+                  required
+                />
+
+                <button id="confirmCreateGroupButton">Create Group</button>
+              </div>
+            </div>
+
+            <!-- Delete User Button -->
+            <button id="deleteUserButton">Delete</button>
+
+            <!-- Delete User Modal -->
+            <div id="deleteUserModal" class="modal">
+              <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Delete User</h2>
+                <label for="deleteUserId">User ID:</label>
+                <input type="number" id="deleteUserId" />
+                <button id="confirmDeleteUserButton">Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Journal Table -->
+        <div class="journal-table">
+          <div id="journalTableContainer">
+            <div class="table-scroll-wrapper">
+              <table id="journalTable">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <!-- Days will be populated dynamically -->
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Rows will be populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Students Waiting for Group Creation section -->
+      <section class="journal-attendance-section">
+        <h2>Students Waiting for Group Creation</h2>
+
+        <!-- Updated filter section to match admin panel style -->
+        <div class="attendance-form">
+          <form id="waitingStudentsFilterForm">
+            <div class="form-group">
+              <label for="waitingCourseFilter">Course:</label>
+              <select id="waitingCourseFilter">
+                <option value="">All Courses</option>
+                {% for course in courses %}
+                <option value="{{ course[1] }}">{{ course[1] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
+        </div>
+
+        <table id="waitingStudentsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Course</th>
+              <th>Enrollment Date</th>
+              <th>Contact</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students_waiting %}
+            <tr>
+              <td>{{ student.user_id }}</td>
+              <td>{{ student.user_name }}</td>
+              <td>{{ student.user_email }}</td>
+              <td>{{ student.course_name }}</td>
+              <td>{{ student.enrolled_at_formatted }}</td>
+              <td>
+                {% if student.phone_number %}
+                <a
+                  href="https://wa.me/{{ student.phone_number }}"
+                  target="_blank"
+                  class="whatsapp-btn"
+                >
+                  <i class="fab fa-whatsapp"></i> Chat
+                </a>
+                {% else %} No number {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Admin Panel Section -->
+      <section class="journal-attendance-section">
+        <h2>Admin Panel</h2>
+        <!-- Filter panel -->
+        <div class="attendance-form">
+          <form id="adminFilterForm">
+            <div class="form-group">
+              <label for="searchInput">Search:</label>
+              <input type="text" id="searchInput" placeholder="Search" />
+            </div>
+            <div class="form-group">
+              <label for="roleFilter">Role:</label>
+              <select id="roleFilter">
+                <option value="">All Roles</option>
+                <option value="teacher">Teacher</option>
+                <option value="student">Student</option>
+              </select>
+            </div>
+          </form>
+          <!-- Add this after the role filter in your admin panel section -->
+          <div class="form-group">
+            <button id="addTeacherButton" class="modal-button">
+              Add Teacher
+            </button>
+          </div>
+
+          <!-- Add Teacher Modal -->
+          <div id="addTeacherModal" class="modal">
+            <div class="modal-content">
+              <span class="close">&times;</span>
+              <h2>Register New Teacher</h2>
+
+              <form id="teacherForm">
+                <div class="form-group">
+                  <label for="teacherName">Full Name:</label>
+                  <input type="text" id="teacherName" required minlength="3" />
+                </div>
+
+                <div class="form-group">
+                  <label for="teacherEmail">Email:</label>
+                  <input type="email" id="teacherEmail" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="teacherPhone">Phone Number:</label>
+                  <input type="tel" id="teacherPhone" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="teacherBirthday">Birthday:</label>
+                  <input type="date" id="teacherBirthday" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="teacherPassword">Password:</label>
+                  <input
+                    type="password"
+                    id="teacherPassword"
+                    required
+                    minlength="8"
+                  />
+                </div>
+
+                <button type="submit" id="confirmAddTeacher">
+                  Register Teacher
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <!-- Admin Panel's Table -->
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Phone Number</th>
+              <th>Birthday</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user[0] }}</td>
+              <td>{{ user[1] }}</td>
+              <td>{{ user[2] }}</td>
+              <td>{{ user[3] }}</td>
+              <td>{{ user[5] }}</td>
+              <td class="birthday-cell">{{ user[6] }}</td>
+              <td>
+                {% if user[3] != 'admin' %}
+                <button
+                  type="button"
+                  class="delete-btn"
+                  data-user-id="{{ user[0] }}"
+                >
+                  Delete
+                </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 SkillCraft</p>
+    </footer>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
