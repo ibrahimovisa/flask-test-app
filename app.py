@@ -26,8 +26,6 @@ app.config['MAIL_PASSWORD'] = 'olercodlueziexyi'  # Your Gmail app password
 app.config['MAIL_DEFAULT_SENDER'] = 'ibrahimovisa2004@gmail.com'  # Default sender
 mail = Mail(app)
 
-# Database configuration
-# Database connection function
 def get_db_connection():
     host = os.getenv("DB_HOST")
     dbname = os.getenv("DB_NAME")
@@ -35,19 +33,18 @@ def get_db_connection():
     password = os.getenv("DB_PASSWORD")
     port = os.getenv("DB_PORT", 5432)
 
-    try:
-        conn = psycopg2.connect(
-            host=host,
-            dbname=dbname,
-            user=user,
-            password=password,
-            port=port,
-            sslmode='require'
-        )
-        return conn
-    except OperationalError as e:
-        print(f"Ошибка подключения к БД: {e}")
-        raise
+    if not host or not dbname or not user or not password:
+        raise Exception("Отсутствуют необходимые переменные окружения для подключения к БД")
+
+    conn = psycopg2.connect(
+        host=host,
+        dbname=dbname,
+        user=user,
+        password=password,
+        port=port,
+        sslmode='require'  # очень важно для Render
+    )
+    return conn
 
 
 # Function to send Email
