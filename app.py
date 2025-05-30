@@ -26,18 +26,14 @@ app.config['MAIL_DEFAULT_SENDER'] = 'ibrahimovisa2004@gmail.com'  # Default send
 mail = Mail(app)
 
 # Database configuration
-DB_HOST = "localhost"
-DB_NAME = "course_platform"
-DB_USER = "postgres"
-DB_PASSWORD = "123"
-
 # Database connection function
 def get_db_connection():
     return psycopg2.connect(
-        host=DB_HOST,
-        dbname=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
+        host=os.getenv("DB_HOST"),
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        port=os.getenv("DB_PORT", 5432)  # по умолчанию 5432
     )
 
 # Function to send Email
