@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from flask_mail import Mail, Message
 import random
 import psycopg2
+from psycopg2 import OperationalError
 import os
 from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -28,15 +29,25 @@ mail = Mail(app)
 # Database configuration
 # Database connection function
 def get_db_connection():
-    print("DB_HOST:", os.getenv("DB_HOST"))
-    print("DB_NAME:", os.getenv("DB_NAME"))
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        dbname=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        port=os.getenv("DB_PORT", 5432)
-    )
+    host = os.getenv("DB_HOST")
+    dbname = os.getenv("DB_NAME")
+    user = os.getenv("DB_USER")
+    password = os.getenv("DB_PASSWORD")
+    port = os.getenv("DB_PORT", 5432)
+
+    try:
+        conn = psycopg2.connect(
+            host=host,
+            dbname=dbname,
+            user=user,
+            password=password,
+            port=port,
+            sslmode='require'
+        )
+        return conn
+    except OperationalError as e:
+        print(f"Ошибка подключения к БД: {e}")
+        raise
 
 
 # Function to send Email
