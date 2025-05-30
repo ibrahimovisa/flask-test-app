@@ -24,14 +24,20 @@
     <main>
       <section id="verify-email-form">
         <h2>Enter Verification Code</h2>
-        {% if message %}
-        <p class="error-message">{{ message }}</p>
-        {% endif %}
+
+        <!-- Flash сообщения -->
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="flash">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
         <form method="POST">
-          <!-- Corrected the for attribute to match the id of the input -->
-          <label for="verification_code"
-            >Enter the verification code sent to your email:</label
-          >
+          <label for="verification_code">
+            Enter the verification code sent to your email:
+          </label>
           <input
             type="text"
             id="verification_code"
