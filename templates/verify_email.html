@@ -13,31 +13,40 @@
   <body>
     <header>
       <nav>
-        <div class="logo"><a href="{{ url_for('index') }}">SkillCraft</a></div>
-        <div class="header-right">
-          <a href="{{ url_for('login') }}">Login</a>
-          <a href="{{ url_for('signup') }}">Sign Up</a>
+        <div class="logo-container">
+          <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <span>SkillCraft</span>
+          </div>
+          <div class="hamburger" id="hamburger">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+          </div>
+        </div>
+        <div class="header-right" id="headerRight">
+          <a href="#" class="header-link">Home</a>
+          <a href="#" class="header-link">Courses</a>
+          <a href="#" class="header-link">About</a>
+          <a href="{{ url_for('login') }}" class="btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </a>
         </div>
       </nav>
     </header>
+    
 
     <main>
       <section id="verify-email-form">
         <h2>Enter Verification Code</h2>
-
-        <!-- Flash сообщения -->
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div class="flash">{{ message }}</div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
+        {% if message %}
+        <p class="error-message">{{ message }}</p>
+        {% endif %}
         <form method="POST">
-          <label for="verification_code">
-            Enter the verification code sent to your email:
-          </label>
+          <!-- Corrected the for attribute to match the id of the input -->
+          <label for="verification_code"
+            >Enter the verification code sent to your email:</label
+          >
           <input
             type="text"
             id="verification_code"
@@ -50,7 +59,10 @@
     </main>
 
     <footer>
-      <p>&copy; 2025 SkillCraft</p>
+      <div class="footer-content">
+        <p>&copy; 2025 SkillCraft. All rights reserved.</p>
+      </div>
     </footer>
+
   </body>
 </html>
