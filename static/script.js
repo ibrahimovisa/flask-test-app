@@ -741,7 +741,7 @@ document.getElementById("teacherForm")?.addEventListener("submit", registerTeach
 
 function setupTableFilters() {
   // Admin Panel Filters
-  const adminTable = document.querySelector('.journal-attendance-section:last-child table');
+  const adminTable = document.querySelector('.dashboard-panel:last-child table');
   if (adminTable) {
       const roleFilter = document.getElementById('roleFilter');
       const searchInput = document.getElementById('searchInput');
@@ -1412,7 +1412,6 @@ function populateDayFilter(files) {
 document.addEventListener("DOMContentLoaded", function() {
   setupEventListeners();
   setupTableFilters();
-  setupFileActions();
   
   if (document.getElementById('teacherFilesContainer')) {
     setupTeacherFileUpload();
@@ -1655,16 +1654,12 @@ async function loadTeacherFiles(courseId, day) {
           <div>Uploaded by: ${file.uploader}</div>
         </div>
         <div class="file-actions">
-          <button class="download-btn" 
-          data-file="${file.file_path}" 
-          data-name="${file.file_name}">
-    Download
-  </button>
-  <button class="delete-btn" 
-          data-id="${file.id}"
-          ${!file.is_teacher_upload ? 'data-owner="true"' : ''}>
-    Delete
-  </button>
+          <button class="download-btn" data-file="${file.file_path}" data-name="${file.file_name}">
+            Download
+          </button>
+          <button class="delete-btn" data-id="${file.id}">
+            Delete
+          </button>
         </div>
       `;
       container.appendChild(fileCard);
@@ -1706,11 +1701,9 @@ async function loadStudentFiles(courseId, day) {
             Download
           </button>
           ${!file.is_teacher_upload ? `
-          <button class="delete-btn" 
-          data-id="${file.id}"
-          ${!file.is_teacher_upload ? 'data-owner="true"' : ''}>
-    Delete
-  </button>` : ''}
+          <button class="delete-btn" data-id="${file.id}">
+            Delete
+          </button>` : ''}
         </div>
       `;
       container.appendChild(fileCard);
@@ -1722,61 +1715,3 @@ async function loadStudentFiles(courseId, day) {
 }
 
 
-function setupFileActions() {
-  // Download functionality
-  document.body.addEventListener('click', async function(e) {
-    if (e.target.classList.contains('download-btn')) {
-        const filePath = e.target.dataset.file;
-        const fileName = e.target.dataset.name;
-        
-        try {
-            // Direct download without blob conversion
-            const a = document.createElement('a');
-            a.href = `/download_file/${encodeURIComponent(filePath)}`;
-            a.download = fileName;
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error('Download failed:', error);
-            alert('Download failed. Please try again.');
-        }
-    }
-});
-
-
-  // Delete functionality
-  document.body.addEventListener('click', async function(e) {
-    if (e.target.classList.contains('delete-btn')) {
-      const fileId = e.target.dataset.id;
-      const card = e.target.closest('.file-card');
-      
-      if (!confirm('Are you sure you want to delete this file?')) return;
-
-      try {
-        const response = await fetch(`/delete_course_file/${fileId}`, {
-          method: 'DELETE'
-        });
-        
-        if (response.ok) {
-          card.remove();
-          // Refresh files list if in teacher dashboard
-          if (document.getElementById('teacherFilesContainer')) {
-            const courseId = document.getElementById('teacherCourseSelect').value;
-            const day = document.getElementById('teacherDaySelect').value;
-            if (courseId && day) loadTeacherFiles(courseId, day);
-          }
-          // Refresh files list if in student view
-          if (document.getElementById('studentFilesContainer')) {
-            const courseId = window.location.pathname.split('/')[2];
-            const day = document.getElementById('studentDaySelect').value;
-            if (courseId && day) loadStudentFiles(courseId, day);
-          }
-        }
-      } catch (error) {
-        console.error('Delete failed:', error);
-      }
-    }
-  });
-}
