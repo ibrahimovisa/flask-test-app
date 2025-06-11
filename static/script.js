@@ -1714,4 +1714,255 @@ async function loadStudentFiles(courseId, day) {
   }
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+  const sidebarToggle = document.getElementById("sidebarToggle");
+  const sidebar = document.getElementById("sidebar");
 
+  const mainContent = document.getElementById("mainContent");
+
+  const notificationBtn = document.getElementById("notificationBtn");
+  const notificationDropdown = document.getElementById("notificationDropdown");
+
+  const profileBtn = document.getElementById("profileBtn");
+  const profileDropdown = document.getElementById("profileDropdown");
+
+  // Sidebar toggle
+  sidebarToggle?.addEventListener("click", () => {
+    sidebar.classList.toggle("hidden");
+  
+    // When sidebar is hidden, center main content
+    if (sidebar.classList.contains("hidden")) {
+      mainContent.classList.add("centered-main");
+      mainContent.classList.remove("ml-64");
+      mainContent.classList.remove("w-[calc(100%-16rem)]");
+    } else {
+      mainContent.classList.remove("centered-main");
+      mainContent.classList.add("ml-64");
+      mainContent.classList.add("w-[calc(100%-16rem)]");
+    }
+  });
+  
+
+  // Dropdown toggle
+  notificationBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    notificationDropdown.classList.toggle("hidden");
+    profileDropdown?.classList.add("hidden");
+  });
+
+  profileBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    profileDropdown.classList.toggle("hidden");
+    notificationDropdown?.classList.add("hidden");
+  });
+
+  // Outside click to close dropdowns
+  document.addEventListener("click", () => {
+    notificationDropdown?.classList.add("hidden");
+    profileDropdown?.classList.add("hidden");
+  });
+
+  notificationDropdown?.addEventListener("click", (e) => e.stopPropagation());
+  profileDropdown?.addEventListener("click", (e) => e.stopPropagation());
+
+  // Responsive sidebar collapse
+  function adjustSidebar() {
+    if (window.innerWidth < 1024) {
+      sidebar.classList.add("sidebar-collapsed");
+    } else {
+      sidebar.classList.remove("sidebar-collapsed");
+    }
+  }
+
+  window.addEventListener("resize", adjustSidebar);
+  adjustSidebar();
+
+  // Calendar
+  const calendarDays = document.getElementById("calendarDays");
+  const monthYear = document.getElementById("monthYear");
+  const prevMonth = document.getElementById("prevMonth");
+  const nextMonth = document.getElementById("nextMonth");
+
+  let currentDate = new Date();
+
+  function renderCalendar(date) {
+    if (!calendarDays || !monthYear) return;
+
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const today = new Date();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDay = firstDay.getDay();
+    const prevLastDay = new Date(year, month, 0).getDate();
+
+    // Remove previous day cells
+    calendarDays.querySelectorAll("div").forEach((div, i) => {
+      if (i >= 7) div.remove();
+    });
+
+    // Previous month
+    for (let i = startDay - 1; i >= 0; i--) {
+      calendarDays.appendChild(createDayCell(prevLastDay - i, true));
+    }
+
+    // Current month
+    for (let i = 1; i <= daysInMonth; i++) {
+      const cell = createDayCell(i, false);
+      if (
+        i === today.getDate() &&
+        year === today.getFullYear() &&
+        month === today.getMonth()
+      ) {
+        cell.classList.add("bg-[#4361ee]", "text-white", "rounded-full");
+      }
+      calendarDays.appendChild(cell);
+    }
+
+    // Next month
+    const total = startDay + daysInMonth;
+    const nextDays = (7 - (total % 7)) % 7;
+    for (let i = 1; i <= nextDays; i++) {
+      calendarDays.appendChild(createDayCell(i, true));
+    }
+
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    monthYear.textContent = `${monthNames[month]} ${year}`;
+  }
+
+  function createDayCell(text, isFaded = false) {
+    const cell = document.createElement("div");
+    cell.className = `py-1 ${isFaded ? 'opacity-30' : ''}`;
+    cell.textContent = text;
+    return cell;
+  }
+
+  prevMonth?.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar(currentDate);
+  });
+
+  nextMonth?.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar(currentDate);
+  });
+
+  renderCalendar(currentDate);
+});
+
+
+// JavaScript for View All Modal Handling
+
+document.querySelectorAll('.view-all-btn').forEach(button => {
+  button.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    const title = this.dataset.title;
+    const courses = JSON.parse(this.dataset.courses || '[]');
+    const modal = document.getElementById('courseModal');
+    const modalTitle = document.getElementById('courseModalTitle');
+    const modalBody = document.getElementById('courseModalBody');
+
+    modalTitle.textContent = title;
+    modalBody.innerHTML = '';
+
+    if (courses.length === 0) {
+      modalBody.innerHTML = '<p class="text-gray-500 text-center py-4">No courses found.</p>';
+    } else {
+      courses.forEach(course => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-4 border-b';
+
+        const titlePart = document.createElement('div');
+titlePart.className = 'flex-1 min-w-0';
+
+titlePart.innerHTML = `<p class="text-sm font-medium text-gray-900 truncate">${course[1]}</p>`;
+
+if (title === "My Courses") {
+  titlePart.innerHTML += `<p class="text-sm text-gray-500 truncate">Group: ${course[4]}</p>`;
+}
+
+
+        const actionPart = document.createElement('div');
+
+        if (title === "My Courses") {
+          const link = document.createElement('a');
+          link.href = `/course/${course[0]}`;
+          link.className = 'btn btn-primary text-sm px-3 py-1';
+          link.textContent = 'Continue';
+          actionPart.appendChild(link);
+        } else if (title === "Available Courses") {
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/enroll/${course[0]}`;
+
+          const btn = document.createElement('button');
+          btn.type = 'submit';
+          btn.className = 'btn btn-primary text-sm px-3 py-1';
+          btn.textContent = 'Enroll';
+
+          form.appendChild(btn);
+          actionPart.appendChild(form);
+        } else if (title === "Waiting Courses") {
+          const span = document.createElement('span');
+          span.className = 'text-yellow-500 font-semibold text-sm';
+          span.innerHTML = '<i class="fas fa-clock mr-1"></i>Waiting';
+          actionPart.appendChild(span);
+        }
+
+        div.appendChild(titlePart);
+        div.appendChild(actionPart);
+        modalBody.appendChild(div);
+      });
+    }
+
+    modal.style.display = 'block';
+  });
+});
+
+
+function showModalWithCourses(title, courses) {
+  const modal = document.getElementById("coursesModal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalBody = document.getElementById("modalContent");
+
+  if (!modal || !modalTitle || !modalBody) {
+    console.error("Modal structure is missing in HTML");
+    return;
+  }
+
+  modalTitle.textContent = title;
+  modalBody.innerHTML = "";
+
+  if (!Array.isArray(courses) || courses.length === 0) {
+    modalBody.innerHTML = "<p class='text-gray-600 text-center py-4'>No courses available.</p>";
+  } else {
+    courses.forEach((course) => {
+      const courseEl = document.createElement("div");
+      courseEl.className = "p-4 border-b";
+      courseEl.innerHTML = `
+        <h4 class="font-bold text-[#4361ee] text-lg">${course[1]}</h4>
+        <p class="text-sm text-gray-600 mt-1">${course[2] || "No description."}</p>
+      `;
+      modalBody.appendChild(courseEl);
+    });
+  }
+
+  modal.classList.remove("hidden");
+}
+
+// Close modal handlers
+document.getElementById("closeModal")?.addEventListener("click", () => {
+  document.getElementById("coursesModal")?.classList.add("hidden");
+});
+
+document.getElementById("coursesModal")?.addEventListener("click", (e) => {
+  if (e.target.id === "coursesModal") {
+    document.getElementById("coursesModal")?.classList.add("hidden");
+  }
+});
