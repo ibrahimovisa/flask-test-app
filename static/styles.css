@@ -944,3 +944,51 @@ footer {
   justify-content: space-between;
   align-items: center;
 }
+
+
+
+.sidebar {
+  transition: all 0.3s ease;
+}
+.sidebar-collapsed {
+  width: 80px;
+}
+.sidebar-collapsed .nav-text {
+  display: none;
+}
+.sidebar-collapsed .menu-icon {
+  margin-right: 0;
+}
+.main-content {
+  transition: margin-left 0.3s ease;
+}
+.active-menu-item {
+  position: relative;
+}
+.active-menu-item::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 70%;
+  background-color: #4361ee;
+  border-radius: 2px 0 0 2px;
+}
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.notification-slide {
+  animation: slideIn 0.3s ease-out;
+}
+
+
+
+
+
