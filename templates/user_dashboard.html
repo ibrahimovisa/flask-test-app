@@ -1,130 +1,436 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Dashboard</title>
+  <title>Student Dashboard | SkillCraft</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="/static/script.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex-grow: 1;
+    }
+  </style>
 </head>
-<body>
 
-  <header>
-    <nav>
-      <div class="logo-container">
-        <div class="logo">
-          <i class="fas fa-graduation-cap"></i>
-          <span>SkillCraft</span>
-        </div>
-        <div class="hamburger" id="hamburger">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
+<body class="bg-gray-100 font-sans">
+  <!-- Header -->
+  <header class="fixed top-0 w-full z-50 text-white shadow-md" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center">
+        <button id="sidebarToggle" class="mr-4 text-xl">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="flex items-center">
+          <i class="fas fa-graduation-cap text-pink-400 mr-2"></i>
+          <span class="text-xl font-bold">SkillCraft</span>
         </div>
       </div>
-      <div class="header-right" id="headerRight">
-        <a href="{{ url_for('index') }}" class="header-link">Home</a>
-        <a href="{{ url_for('user_dashboard') }}" class="header-link">Dashboard</a>
-        <a id="logoutLink" class="btn btn-primary" href="{{ url_for('logout') }}"><i class="fas fa-sign-in-alt"></i>Logout</a>
-        
+      <div class="flex items-center space-x-4">
+        <div class="relative">
+          <button id="notificationBtn" class="p-2 rounded-full hover:bg-blue-500 relative">
+            <i class="fas fa-bell"></i>
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+          </button>
+          <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg z-50 text-black">
+            <div class="p-4 border-b">
+              <h3 class="font-semibold">Notifications</h3>
+            </div>
+            <div class="max-h-60 overflow-y-auto"></div>
+            <div class="p-3 border-t text-center">
+              <a href="#" class="text-blue-600 text-sm font-medium">View All Notifications</a>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <button id="profileBtn" class="flex items-center space-x-2">
+            <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+              {{ session.name[0] }}
+            </div>
+            <span class="hidden md:inline">{{ session.name }}</span>
+            <i class="fas fa-caret-down hidden md:inline"></i>
+          </button>
+          <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 text-black">
+            <a href="#" class="block px-4 py-2 hover:bg-gray-100"><i class="fas fa-user mr-2"></i> Profile</a>
+            <a href="#" class="block px-4 py-2 hover:bg-gray-100"><i class="fas fa-cog mr-2"></i> Settings</a>
+            <a href="{{ url_for('logout') }}" class="block px-4 py-2 border-t hover:bg-gray-100"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+          </div>
+        </div>
       </div>
-    </nav>
+    </div>
   </header>
 
-  <main>
-    <div class="dashboard-container">
-      <!-- My Courses Panel -->
-      <section class="dashboard-panel">
-        <h2><i class="fas fa-book-open"></i> My Courses</h2>
-        <div class="courses-grid">
-          {% if enrolled_courses %}
-            {% for course in enrolled_courses %}
-            <div class="course-card">
-              <img
-                src="{{ url_for('static', filename='images/' + course[3]) if course[3] else url_for('static', filename='images/default-course.jpg') }}"
-                alt="{{ course[1] }}"
-              />
-              <h3>{{ course[1] }}</h3>
-              <p>{{ course[2] }}</p>
-              <p class="group-info">Group: {{ course[4] }}</p>
-              <a href="{{ url_for('course_page', course_id=course[0]) }}" class="course-btn">Continue</a>
-            </div>
-            {% endfor %}
-          {% else %}
-            <p class="no-courses">You don't have any active courses yet.</p>
-          {% endif %}
+  <div class="flex pt-16 flex-1">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 bg-white shadow-md fixed h-full z-40 overflow-y-auto">
+      <div class="p-4">
+        <div class="flex items-center mb-6">
+          <div class="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold mr-3">
+            {{ session.name[0] }}
+          </div>
+          <div>
+            <h3 class="font-medium">{{ session.name }}</h3>
+            <p class="text-sm text-gray-500">ID: #{{ session.user_id }}</p>
+          </div>
         </div>
-      </section>
+        <nav>
+          <ul class="space-y-2">
+            <li><a href="{{ url_for('user_dashboard') }}" class="flex items-center p-2 rounded-lg text-gray-700 hover:bg-blue-100"><i class="fas fa-tachometer-alt text-blue-600 mr-3"></i> Dashboard</a></li>
+            <li><a href="#myCoursesSection" class="flex items-center p-2 rounded-lg text-gray-700 hover:bg-blue-100"><i class="fas fa-book text-teal-400 mr-3"></i> My Courses</a></li>
+            <li><a href="#" class="flex items-center p-2 rounded-lg text-gray-700 hover:bg-blue-100"><i class="fas fa-calendar-alt text-purple-600 mr-3"></i> Schedule</a></li>
+            <li><a href="#" class="flex items-center p-2 rounded-lg text-gray-700 hover:bg-blue-100"><i class="fas fa-chart-line text-yellow-500 mr-3"></i> Grades</a></li>
+            <li><a href="#" class="flex items-center p-2 rounded-lg text-gray-700 hover:bg-blue-100"><i class="fas fa-file-alt text-red-500 mr-3"></i> Resources</a></li>
+            <li><a href="#" class="flex items-center p-2 rounded-lg text-gray-700 hover:bg-blue-100"><i class="fas fa-cog text-gray-600 mr-3"></i> Settings</a></li>
+          </ul>
+        </nav>
+      </div>
+    </aside>
 
-      <!-- Available Courses Panel -->
-      <section class="dashboard-panel">
-        <h2><i class="fas fa-graduation-cap"></i> Available Courses</h2>
-        <div class="courses-grid">
-          {% if available_courses %}
-            {% for course in available_courses %}
-            <div class="course-card">
-              <img
-                src="{{ url_for('static', filename='images/' + course[3]) if course[3] else url_for('static', filename='images/default-course.jpg') }}"
-                alt="{{ course[1] }}"
-              />
-              <h3>{{ course[1] }}</h3>
-              <p>{{ course[2] }}</p>
-              <form action="{{ url_for('enroll', course_id=course[0]) }}" method="POST">
-                <button type="submit" class="course-btn">Enroll Now</button>
-              </form>
-            </div>
-            {% endfor %}
-          {% endif %}
+    <!-- Main Content -->
+    <main id="mainContent" class="ml-64 w-full p-6">
 
-          {% if waiting_courses %}
-            {% for course in waiting_courses %}
-            <div class="course-card">
-              <img
-                src="{{ url_for('static', filename='images/' + course[3]) if course[3] else url_for('static', filename='images/default-course.jpg') }}"
-                alt="{{ course[1] }}"
-              />
-              <h3>{{ course[1] }}</h3>
-              <p>{{ course[2] }}</p>
-              <div class="waiting-badge">
-                <i class="fas fa-clock"></i> Waiting for group assignment
+
+      <div class="container mx-auto px-4 py-6">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-[#4361ee] to-[#3a56d4] text-white rounded-xl p-6 mb-6 shadow-lg">
+          <h2 class="text-2xl font-bold mb-2">
+            Welcome back, {{ session.name }}!
+          </h2>
+          <p class="opacity-90 mb-4">
+            You have enrolled in {{ enrolled_courses|length +
+            waiting_courses|length }} courses.
+          </p>
+          <div class="flex flex-wrap items-center gap-4">
+            <div class="flex items-center bg-[#3a56d4] rounded-lg px-3 py-2">
+              <i class="fas fa-user-graduate mr-2"></i>
+              <div>
+                <p class="text-xs opacity-80">Student ID</p>
+                <p class="font-medium">#{{ session.user_id }}</p>
               </div>
             </div>
-            {% endfor %}
-          {% endif %}
-
-          {% if not available_courses and not waiting_courses %}
-            <p class="no-courses">No available courses at the moment.</p>
-          {% endif %}
+            <div class="flex items-center bg-[#3a56d4] rounded-lg px-3 py-2">
+              <i class="fas fa-envelope mr-2"></i>
+              <div>
+                <p class="text-xs opacity-80">Email</p>
+                <p class="font-medium">{{ session.email }}</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
-    </div>
-  </main>
 
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div class="bg-white rounded-lg shadow-md p-6 card-hover transition duration-300">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-blue-100 text-[#4361ee] mr-4">
+                <i class="fas fa-book text-xl"></i>
+              </div>
+              <div>
+                <p class="text-gray-500 text-sm">Total Courses</p>
+                <h3 class="text-2xl font-bold">
+                  {{ enrolled_courses|length + waiting_courses|length }}
+                </h3>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 card-hover transition duration-300">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-green-100 text-[#4cc9f0] mr-4">
+                <i class="fas fa-check-circle text-xl"></i>
+              </div>
+              <div>
+                <p class="text-gray-500 text-sm">Active Courses</p>
+                <h3 class="text-2xl font-bold">
+                  {{ enrolled_courses|length }}
+                </h3>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 card-hover transition duration-300">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-yellow-100 text-[#ff9e00] mr-4">
+                <i class="fas fa-clock text-xl"></i>
+              </div>
+              <div>
+                <p class="text-gray-500 text-sm">Waiting Courses</p>
+                <h3 class="text-2xl font-bold">
+                  {{ waiting_courses|length }}
+                </h3>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 card-hover transition duration-300">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-purple-100 text-[#7209b7] mr-4">
+                <i class="fas fa-graduation-cap text-xl"></i>
+              </div>
+              <div>
+                <p class="text-gray-500 text-sm">Available Courses</p>
+                <h3 class="text-2xl font-bold">
+                  {{ available_courses|length }}
+                </h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- My Courses -->
+          <div class="lg:col-span-2">
+            <div id="myCoursesSection" class="bg-white rounded-lg shadow-md overflow-hidden">
+              <div class="flex items-center justify-between p-4 border-b">
+                <h3 class="font-bold text-lg">
+                  <i class="fas fa-book-open mr-2 text-[#4361ee]"></i> My
+                  Courses
+                </h3>
+                <a href="#myCoursesSection" class="view-all-btn" data-title="My Courses"
+                  data-courses='{{ enrolled_courses | tojson | default("[]") | safe }}'>
+                  <span>View All</span>
+                  <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                </a>
+              </div>
+              <div class="divide-y divide-gray-100 max-h-60 overflow-y-auto">
+                {% if enrolled_courses %} {% for course in enrolled_courses %}
+                <div class="p-4 hover:bg-gray-50 cursor-pointer transition">
+                  <div class="flex items-start">
+                    <div
+                      class="flex-shrink-0 h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center text-[#7209b7] mr-4">
+                      <i class="fas fa-book"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-medium text-gray-900 truncate">
+                        {{ course[1] }}
+                      </p>
+                      <p class="text-sm text-gray-500 truncate">
+                        Group: {{ course[4] }}
+                      </p>
+                    </div>
+                    <a href="{{ url_for('course_page', course_id=course[0]) }}"
+                      class="btn btn-primary py-1 px-3 text-sm">
+                      Continue
+                    </a>
+                  </div>
+                </div>
+                {% endfor %} {% else %}
+                <div class="p-4 text-center text-gray-500">
+                  You don't have any active courses yet.
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Calendar -->
+          <div class="bg-white rounded-lg shadow-md overflow-hidden" id="calendarContainer">
+            <div class="p-4 border-b">
+              <h3 class="font-bold text-lg mb-4">
+                <i class="fas fa-calendar-alt mr-2 text-[#ff4081]"></i>
+                Academic Calendar
+              </h3>
+              <div class="flex items-center justify-between mb-4">
+                <button id="prevMonth" class="p-1 rounded-full hover:bg-gray-100">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <h4 id="monthYear" class="font-medium">Loading...</h4>
+                <button id="nextMonth" class="p-1 rounded-full hover:bg-gray-100">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+              <div class="grid grid-cols-7 gap-1 text-center text-sm" id="calendarDays">
+                <div class="font-medium py-1">Sun</div>
+                <div class="font-medium py-1">Mon</div>
+                <div class="font-medium py-1">Tue</div>
+                <div class="font-medium py-1">Wed</div>
+                <div class="font-medium py-1">Thu</div>
+                <div class="font-medium py-1">Fri</div>
+                <div class="font-medium py-1">Sat</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Available and Waiting Courses -->
+          <div class="lg:col-span-2">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Available Courses -->
+              <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="flex items-center justify-between p-4 border-b">
+                  <h3 class="font-bold text-lg">
+                    <i class="fas fa-graduation-cap mr-2 text-[#4cc9f0]"></i>
+                    Available Courses
+                  </h3>
+                  <a href="#availableCoursesSection" class="view-all-btn" data-title="Available Courses"
+                    data-courses='{{ available_courses | tojson | default("[]") | safe }}'>
+                    <span>View All</span>
+                    <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                  </a>
+
+                </div>
+                <div class="divide-y divide-gray-100 max-h-60 overflow-y-auto">
+                  {% if available_courses %} {% for course in
+                  available_courses %}
+                  <div class="p-4 hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-start">
+                      <div
+                        class="flex-shrink-0 h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-[#4cc9f0] mr-4">
+                        <i class="fas fa-plus"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">
+                          {{ course[1] }}
+                        </p>
+                      </div>
+                      <form action="{{ url_for('enroll', course_id=course[0]) }}" method="POST">
+                        <button type="submit" class="btn btn-primary py-1 px-3 text-sm">
+                          Enroll
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                  {% endfor %} {% else %}
+                  <div class="p-4 text-center text-gray-500">
+                    No available courses at the moment.
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <!-- Waiting Courses -->
+              <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="flex items-center justify-between p-4 border-b">
+                  <h3 class="font-bold text-lg">
+                    <i class="fas fa-clock mr-2 text-[#ff9e00]"></i> Waiting
+                    Courses
+                  </h3>
+                  <a href="#waitingCoursesSection" class="view-all-btn" data-title="Waiting Courses"
+                    data-courses='{{ waiting_courses | tojson | default("[]") | safe }}'>
+                    <span>View All</span>
+                    <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                  </a>
+                </div>
+                <div class="divide-y divide-gray-100 max-h-60 overflow-y-auto">
+                  {% if waiting_courses %} {% for course in waiting_courses %}
+                  <div class="p-4 hover:bg-gray-50 cursor-pointer transition">
+                    <div class="flex items-start">
+                      <div
+                        class="flex-shrink-0 h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center text-[#ff9e00] mr-4">
+                        <i class="fas fa-hourglass-half"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">
+                          {{ course[1] }}
+                        </p>
+                      </div>
+                      <div class="course-badge waiting-badge px-2 py-1 text-xs">
+                        <i class="fas fa-clock"></i> Waiting
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %} {% else %}
+                  <div class="p-4 text-center text-gray-500">
+                    No courses waiting for assignment.
+                  </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+              <div class="p-4 border-b">
+                <h3 class="font-bold text-lg">
+                  <i class="fas fa-link mr-2 text-[#ff4081]"></i> Quick Links
+                </h3>
+              </div>
+              <div class="p-4 grid grid-cols-2 gap-3">
+                <a href="{{ url_for('user_dashboard') }}"
+                  class="p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition flex flex-col items-center">
+                  <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-[#4361ee] mb-2">
+                    <i class="fas fa-tachometer-alt"></i>
+                  </div>
+                  <span class="text-sm text-center">Dashboard</span>
+                </a>
+                <a href="#" class="p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition flex flex-col items-center">
+                  <div
+                    class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-[#7209b7] mb-2">
+                    <i class="fas fa-calendar-alt"></i>
+                  </div>
+                  <span class="text-sm text-center">Schedule</span>
+                </a>
+                <a href="#myCoursesSection" 
+                class="p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition flex flex-col items-center view-all-btn" 
+                data-title="My Courses" 
+                data-courses='{{ enrolled_courses | tojson | default("[]") | safe }}'>
+               <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-[#4cc9f0] mb-2">
+                 <i class="fas fa-graduation-cap"></i>
+               </div>
+               <span class="text-sm text-center">Courses</span>
+             </a>
+             
+                <a href="#" class="p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition flex flex-col items-center">
+                  <div
+                    class="h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center text-[#ff9e00] mb-2">
+                    <i class="fas fa-book"></i>
+                  </div>
+                  <span class="text-sm text-center">Resources</span>
+                </a>
+                <a href="#" class="p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition flex flex-col items-center">
+                  <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center text-[#e63946] mb-2">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                  </div>
+                  <span class="text-sm text-center">Finances</span>
+                </a>
+                <a href="{{ url_for('logout') }}"
+                  class="p-4 bg-gray-50 rounded-lg hover:bg-blue-50 transition flex flex-col items-center">
+                  <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 mb-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                  </div>
+                  <span class="text-sm text-center">Logout</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Course Modal -->
+  <div id="courseModal" class="modal fixed z-50 inset-0 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen">
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 id="courseModalTitle" class="text-xl font-bold"></h2>
+          <button class="close text-gray-500 hover:text-gray-800">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="courseModalBody"></div>
+      </div>
+    </div>
+  </div>
+  
   <footer>
     <div class="footer-content">
       <p>&copy; 2025 SkillCraft. All rights reserved.</p>
     </div>
   </footer>
-  
-  <script>
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.getElementById('headerRight');
-    
-    hamburger.addEventListener('click', function() {
-      headerRight.classList.toggle('active');
-      hamburger.classList.toggle('active');
-    });
-    
-    document.addEventListener('click', function(event) {
-      const isClickInsideNav = 
-        hamburger.contains(event.target) || 
-        headerRight.contains(event.target);
-      
-      if (!isClickInsideNav && headerRight.classList.contains('active')) {
-        headerRight.classList.remove('active');
-        hamburger.classList.remove('active');
-      }
-    });
-  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
+
 </html>
