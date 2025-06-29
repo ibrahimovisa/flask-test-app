@@ -59,6 +59,7 @@ function validateForm() {
     valid = false;
   }
 
+  
   // If the SMS code field is visible, validate it
   const smsCodeField = document.getElementById("sms_code");
   if (smsCodeField && smsCodeField.style.display === "block") {
