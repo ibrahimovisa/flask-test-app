@@ -1478,8 +1478,9 @@ async function setupStudentUpload(courseId) {
 
 
 
-// Teacher File Management
+// ====================== TEACHER FILE UPLOAD FIX ======================
 function setupTeacherFileUpload() {
+  // CORRECTED IDs to match your HTML
   const courseSelect = document.getElementById('teacherCourseSelect');
   const groupSelect = document.getElementById('teacherGroupSelect');
   const daySelect = document.getElementById('teacherDaySelect');
@@ -1487,7 +1488,6 @@ function setupTeacherFileUpload() {
 
   async function loadSelections() {
     try {
-      // Load initial files if selections exist
       if (courseSelect.value && groupSelect.value && daySelect.value) {
         await loadTeacherFiles(courseSelect.value, daySelect.value);
       }
@@ -1534,6 +1534,7 @@ function setupTeacherFileUpload() {
     }
   });
 
+  // CORRECTED FORM ID to match your HTML
   document.getElementById('teacherUploadForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new FormData();
